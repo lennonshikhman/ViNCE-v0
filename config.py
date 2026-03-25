@@ -40,6 +40,18 @@ TREE_VISUALIZATION_PATH = OUTPUT_DIR / "decision_tree.svg"
 HEATMAP_DIR = OUTPUT_DIR / "feature_heatmap_grids"
 HIGHLIGHTED_DIR = OUTPUT_DIR / "highlighted_images"
 COMPOSITE_DIR = OUTPUT_DIR / "composite_images"
+VLM_DESCRIPTOR_DIR = OUTPUT_DIR / "vlm_descriptors"
+VLM_DESCRIPTOR_JSON_PATH = VLM_DESCRIPTOR_DIR / "descriptor_summary.json"
+VLM_DESCRIPTOR_ANALYSIS_PATH = VLM_DESCRIPTOR_DIR / "descriptor_analysis.json"
+
+# VLM descriptor generation
+VLM_ENABLED = os.getenv("VINCE_VLM_ENABLED", "1") == "1"
+VLM_PROVIDER = os.getenv("VINCE_VLM_PROVIDER", "openai")
+VLM_MODEL = os.getenv("VINCE_VLM_MODEL", "gpt-4.1-mini")
+VLM_COMPONENTS_TO_DESCRIBE = int(os.getenv("VINCE_VLM_COMPONENTS_TO_DESCRIBE", "20"))
+VLM_TOP_SAMPLES_PER_COMPONENT = int(os.getenv("VINCE_VLM_TOP_SAMPLES_PER_COMPONENT", "4"))
+VLM_DESCRIPTOR_CONFIDENCE_THRESHOLD = float(os.getenv("VINCE_VLM_DESCRIPTOR_CONFIDENCE_THRESHOLD", "0.55"))
+VLM_REQUEST_TIMEOUT_SEC = int(os.getenv("VINCE_VLM_REQUEST_TIMEOUT_SEC", "90"))
 
 # Class names for Imagenette
 IMAGENETTE_CLASSES = [
@@ -48,5 +60,5 @@ IMAGENETTE_CLASSES = [
 ]
 
 # Ensure output directories exist
-for dir_path in [OUTPUT_DIR, HEATMAP_DIR, HIGHLIGHTED_DIR, COMPOSITE_DIR]:
+for dir_path in [OUTPUT_DIR, HEATMAP_DIR, HIGHLIGHTED_DIR, COMPOSITE_DIR, VLM_DESCRIPTOR_DIR]:
     os.makedirs(dir_path, exist_ok=True)
