@@ -15,6 +15,10 @@ Can we distill a high-performing convolutional neural network into a lightweight
 - **Teacher model**: ResNet50 trained on the Imagenette dataset
 - **Student model**: Decision Tree trained on PCA-reduced ResNet features
 - **Distillation**: Teacher logits guide the student for fidelity and interpretability
+- **VLM descriptor generation**:
+  - Uses a vision-language model to name important PCA components
+  - Logs prompts, raw responses, confidence/relevance-ranked candidates, and selected descriptors
+  - Injects selected descriptors into decision tree feature labels
 - **Explainability**:
   - Grad-CAM, Guided Backpropagation, and PEEK entropy maps
   - Composite image overlays with attention + uncertainty
@@ -70,10 +74,22 @@ python app.py
 It will:
 - Train the teacher
 - Distill and evaluate the student
+- Generate VLM-backed semantic descriptors for tree-relevant PCA components (if `OPENAI_API_KEY` is set)
 - Extract misclassifications
 - Auto-generate Grad-CAM, Guided BP, PEEK visualizations
 - Cluster errors via t-SNE
 - Save everything to the `outputs/` directory
+
+### Optional environment variables for VLM
+
+```bash
+export OPENAI_API_KEY=...
+export VINCE_VLM_ENABLED=1
+export VINCE_VLM_MODEL=gpt-4.1-mini
+export VINCE_VLM_COMPONENTS_TO_DESCRIBE=20
+export VINCE_VLM_TOP_SAMPLES_PER_COMPONENT=4
+export VINCE_VLM_DESCRIPTOR_CONFIDENCE_THRESHOLD=0.55
+```
 
 ---
 
@@ -81,6 +97,8 @@ It will:
 
 You’ll get:
 - `outputs/decision_tree.svg` — student model visualization
+- `outputs/vlm_descriptors/descriptor_summary.json` — per-component prompts, raw VLM responses, candidates, and selected descriptors
+- `outputs/vlm_descriptors/descriptor_analysis.json` — aggregate descriptor coverage/confidence analysis
 - `outputs/misclassified_viz/` — Grad-CAM + PEEK overlays
 - `outputs/tsne_misclassified_clusters.png` — clustered t-SNE plot
 - `outputs/misclassified_summary.json` — structured error log

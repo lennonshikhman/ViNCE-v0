@@ -16,9 +16,15 @@ from interpret.gradcam import compute_gradcam
 from interpret.guided_backprop import compute_guided_backprop
 from interpret.peek import compute_peek_map, compute_peek_overlay
 from interpret.composite import plot_composite_grid
+from analyze.vlm_descriptors import (
+    analyze_descriptor_quality,
+    build_descriptor_feature_names,
+    generate_vlm_component_descriptors,
+)
 import time
 import sys
 import os
+from config import VLM_ENABLED
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -63,17 +69,31 @@ def main():
     kappa = compute_kappa(y_true_test, y_pred_test)
     print(f"Cohen's Kappa Score: {kappa:.4f}")
 
-    # 6. Visualize Tree
+    # 6. Optional VLM descriptors for PCA components
+    descriptor_records = []
+    if VLM_ENABLED:
+        print("\n>>> Generating VLM semantic descriptors for PCA components...")
+        descriptor_records = generate_vlm_component_descriptors(
+            train_pca_features=feats_train_pca,
+            pca_model=pca_model,
+            train_dataset=train_loader.dataset,
+            used_feature_indices=get_used_features(student),
+        )
+        analyze_descriptor_quality(descriptor_records)
+
+    # 7. Visualize Tree
     print("\n>>> Visualizing decision tree...")
-    used_feats = get_used_features(student)
-    feature_names = [f"PC {i}" for i in range(student.n_features_in_)]
+    if descriptor_records:
+        feature_names = build_descriptor_feature_names(student.n_features_in_, descriptor_records)
+    else:
+        feature_names = [f"PC {i}" for i in range(student.n_features_in_)]
     plot_decision_tree(student, feature_names, IMAGENETTE_CLASSES, save_path=str(TREE_VISUALIZATION_PATH))
 
-    # 7. t-SNE
+    # 8. t-SNE
     print("\n>>> Plotting t-SNE projection of features...")
     plot_tsne(feats_test_pca, y_true_test, class_names=IMAGENETTE_CLASSES)
 
-    # 8. Misclassification Analysis
+    # 9. Misclassification Analysis
     print("\n>>> Analyzing misclassifications...")
     misclassified_indices = get_misclassified_indices(teacher_preds_test, y_true_test)
     save_misclassified_summary(misclassified_indices, y_true_test, teacher_preds_test, logits_test, "outputs/misclassified_summary.json")
@@ -95,7 +115,7 @@ def main():
         device=device
     )
 
-    # 9. Misclassification Clustering
+    # 10. Misclassification Clustering
     print("\n>>> Clustering misclassifications with t-SNE...")
     tsne_cluster_misclassifications(feats_test, misclassified_indices, y_true_test)
 
