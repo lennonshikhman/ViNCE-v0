@@ -1,6 +1,16 @@
-# Ignore downloaded Imagenette dataset
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+api.txt
+datasets/*
+!datasets/.gitkeep
+artifacts/
+*.joblib
+*.npz
+*.npy
+.DS_Store
+outputs/
 imagenette2-320/
 imagenette2-320.tgz
-
-# Ignore all outputs
-outputs/
