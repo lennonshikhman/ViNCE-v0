@@ -1,0 +1,11 @@
+torch
+torchvision
+numpy
+scikit-learn
+pillow
+joblib
+openai
+tqdm
+matplotlib
+scipy
+requests
